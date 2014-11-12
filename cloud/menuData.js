@@ -64,7 +64,7 @@ function checkForNewItems(currentMenuItems)
 	itemsQuery.find().then(function(existingItems)
 	{
 		// Sort the list of current items for use in comparison function
-		currentMenuItems.sort(function(a,b){return a.name.localeCompare(b.name)});
+		currentMenuItems.sort(compareItems);
 
 		// Return any new Items
 		promise.resolve(findNewItems(currentMenuItems, existingItems));
@@ -79,6 +79,25 @@ function checkForNewItems(currentMenuItems)
 	return promise;
 }
 
+// Function used to sort JS item objects by their name attribute
+function compareItems(itemA, itemB)
+{
+	// Get the names
+	var nameA = itemA.name;
+	var nameB = itemB.name;
+
+	// Compare
+	if (nameA == nameB)
+	{
+		return 0;		
+	}
+	else if (nameA < nameB)
+	{
+		return -1;
+	}
+	return 1;
+}
+
 // Takes in currentItems and existing Items
 // Returns an array of new items from currentItems that
 // are not in exisiting Items
@@ -90,7 +109,7 @@ function findNewItems(currentItems, existingItems)
 		return [];
 	}
 	// Skip duplicates
-	else if (currentItems.length >= 2 && currentItems[0].name.localeCompare(currentItems[1].name) == 0)
+	else if (currentItems.length >= 2 && currentItems[0].name == currentItems[1].name)
 	{
 		currentItems.splice(0,1);
 		return findNewItems(currentItems, existingItems);
@@ -103,7 +122,7 @@ function findNewItems(currentItems, existingItems)
 		return result;
 	}
 	// If found, eliminate element from both lists
-	else if (currentItems[0].name.localeCompare(existingItems[0].get("name")) == 0)
+	else if (currentItems[0].name == existingItems[0].get("name"))
 	{
 		currentItems.splice(0,1);
 		existingItems.splice(0,1);
@@ -111,7 +130,7 @@ function findNewItems(currentItems, existingItems)
 	}
 	// If currentItem < existingItem, then it is new item,
 	// Add to result and continue processing the list
-	else if (currentItems[0].name.localeCompare(existingItems[0].get("name")) == -1)
+	else if (currentItems[0].name < existingItems[0].get("name"))
 	{
 		var result = [currentItems.splice(0,1)[0]];
 		result.push.apply(result, findNewItems(currentItems, existingItems));
