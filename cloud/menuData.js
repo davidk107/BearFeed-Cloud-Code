@@ -61,6 +61,11 @@ function checkForNewItems(currentMenuItems)
 	itemsQuery.ascending("name");
 	itemsQuery.limit(1000);
 
+	// Limit query to a list of only the names of current menu items 
+	var listOfCurrentItemNames = currentMenuItems.map(function (item) { return item.name});
+	itemsQuery.containedIn("name",listOfCurrentItemNames);
+
+	// Execute the query
 	itemsQuery.find().then(function(existingItems)
 	{
 		// Sort the list of current items for use in comparison function
