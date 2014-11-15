@@ -160,6 +160,7 @@ function saveNewParseItem(itemObject)
 	newItem.set("name", itemObject.name);
 	newItem.set("url", itemObject.url);
 	newItem.set("recNumber", itemObject.recNumber);
+	newItem.set("healthType", itemObject.healthType);
 
 	// Save the new item
 	newItem.save().then(function()

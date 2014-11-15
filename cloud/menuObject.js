@@ -1,3 +1,10 @@
+var HEALTH_TYPE_DICT = 
+{
+	"#000000" : "",
+	"#008000" : "VEGETARIAN",
+	"#800040" : "VEGAN"
+};
+
 exports.MenuObject = function(htmlElements)
 {
 	// Save htmlElements
@@ -92,7 +99,8 @@ function createMenuListForMeal(meal, htmlElements)
 		{
 			url: element.href,
 			name: element.font.content.trim(),
-			recNumber: getRecNumberForItem(element.href)
+			recNumber: getRecNumberForItem(element.href),
+			healthType: getHealthType(element)
 		};
 
 		result.push(foodItem);
@@ -109,4 +117,10 @@ function getRecNumberForItem(urlString)
     var regex = new RegExp("[\\?&]" + recNumber + "=([^&#*]{6})");
     var results = regex.exec(urlString);
     return results == null ? null : decodeURIComponent(results[1].replace("/\+/g", " ")).trim();
+}
+
+// Gets if the health type is normal(""), Vegetarian, or Vegan
+function getHealthType(htmlElement)
+{
+	return HEALTH_TYPE_DICT[htmlElement.font.color];
 }
