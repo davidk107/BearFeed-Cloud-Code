@@ -6,25 +6,13 @@ var Item = Parse.Object.extend("Item");
 
 // Fetches data from CalDining's Menu Website via YQL 
 // Query selects for the 3 <tr> elements that make up the actual menu portion of the page source
-Parse.Cloud.job("updateMenuData", function(request, response)
+exports.updateMenuData = function(currentMenuItems)
 {	
-	var menuObject = null;
-	var currentMenuItems = null;
+	var promise = new Parse.Promise();
 	var newItems = [];
 
 	// Fetch data from the query
-	fetchMenuDetails().then(function(result)
-	{
-		// Convert result into MenuObject
-		menuObject = new menuObjectFile.MenuObject(result);
-
-		// Get all the items
-		currentMenuItems = menuObject.getAllMenuItems();
-		
-		// Check for new items and adds them to the catalog if found
-		return checkForNewItems(currentMenuItems);
-
-	}).then(function(results)
+	checkForNewItems(currentMenuItems).then(function(results)
 	{
 		newItems = results;
 
@@ -39,14 +27,16 @@ Parse.Cloud.job("updateMenuData", function(request, response)
 
 	}).then(function()
 	{
-		response.success("Menu Data Updated with " + newItems.length + " new items!");
+		promise.resolve("Menu Data Updated with " + newItems.length + " new items!");
 	},
 	function(error)
 	{
 		console.log("ERROR w/ updateMenuData: " + error);
-		response.error("ERROR w/ updateMenuData");
+		promise.reject("ERROR w/ updateMenuData");
 	});
-});
+
+	return promise;
+}
 
 // Takes in the list of items from the current menu
 // Fetch all the existing catalog items
@@ -179,7 +169,7 @@ function saveNewParseItem(itemObject)
 // Then parses the data into an JS object
 // JS Object has attributes breakfast, lunch, and dinner 
 // that are linked to arrays of <td> html elements
-function fetchMenuDetails()
+exports.fetchMenuDetails = function()
 {
 	// Create Parse Promise
 	var promise = new Parse.Promise();
