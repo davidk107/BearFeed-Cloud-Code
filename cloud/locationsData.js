@@ -1,0 +1,4 @@
+exports.updateLocationsData = function(currentMenuItems)
+{
+	
+}

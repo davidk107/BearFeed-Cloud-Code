@@ -2,7 +2,10 @@ var HEALTH_TYPE_DICT =
 {
 	"#000000" : "",
 	"#008000" : "VEGETARIAN",
-	"#800040" : "VEGAN"
+	"#008040" : "VEGETARIAN",
+	"#800040" : "VEGAN",
+	"#800000" : "VEGAN",
+	"#800080" : "VEGAN"
 };
 
 exports.MenuObject = function(htmlElements)
@@ -122,5 +125,10 @@ function getRecNumberForItem(urlString)
 // Gets if the health type is normal(""), Vegetarian, or Vegan
 function getHealthType(htmlElement)
 {
-	return HEALTH_TYPE_DICT[htmlElement.font.color];
+	var type = HEALTH_TYPE_DICT[htmlElement.font.color];
+	if (type == null)
+	{
+		type = "";
+	}
+	return type;
 }

@@ -2,7 +2,7 @@ var menuData = require('cloud/menuData.js')
 var menuObjectFile = require('cloud/menuObject.js');
 
 // Main Function that will be called to update the menu twice a day
-Parse.Cloud.define("updateData", function(request, response)
+Parse.Cloud.job("updateData", function(request, response)
 {
 	// Local Variables
 	var menuObject = null;
