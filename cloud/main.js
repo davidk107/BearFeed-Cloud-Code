@@ -1,5 +1,7 @@
 var menuData = require('cloud/menuData.js')
+var locationData = require('cloud/locationsData.js');
 var menuObjectFile = require('cloud/menuObject.js');
+
 
 // Main Function that will be called to update the menu twice a day
 Parse.Cloud.job("updateData", function(request, response)
@@ -7,7 +9,7 @@ Parse.Cloud.job("updateData", function(request, response)
 	// Local Variables
 	var menuObject = null;
 	var currentMenuItems = null;
-
+	var successString;
 	// Fetch the newest queried data from the website
 	menuData.fetchMenuDetails().then(function(result)
 	{
@@ -20,10 +22,17 @@ Parse.Cloud.job("updateData", function(request, response)
 		// Check for new items and adds them to the catalog if found
 		return menuData.updateMenuData(currentMenuItems);
 
-	// Success
-	}).then(function(result)
+	// Successfully updated the list of items
+	}).then(function(updateMenuResult)
 	{
-		response.success(result);
+		successString = updateMenuResult;
+
+		// Update the locations
+		return locationData.updateLocationsData(menuObject);
+
+	}).then(function()
+	{
+		response.success(successString);
 	},
 	// Error Handler
 	function(error)
