@@ -1,6 +1,7 @@
 var menuData = require('cloud/menuData.js')
 var locationData = require('cloud/locationsData.js');
 var menuObjectFile = require('cloud/menuObject.js');
+var pushActionsFiles = require('cloud/pushActions.js');
 require('cloud/userData.js');
 
 
@@ -40,4 +41,34 @@ Parse.Cloud.job("updateData", function(request, response)
 	{
 		response.error("ERROR: " + error.message);
 	});
+});
+
+// Function call to send out push notifications for subscribed items
+Parse.Cloud.job("sendFoodNotifications", function(request, response)
+{
+	// Local Variables
+	var menuObject = null;
+	var currentMenuItems = null;
+
+	// Fetch the newest queried data from the website
+	menuData.fetchMenuDetails().then(function(result)
+	{
+		// Convert result into MenuObject
+		menuObject = new menuObjectFile.MenuObject(result);
+
+		// Get the map of all items
+		currentMappedMenuItems = menuObject.getAllMenuItemsMapped();
+
+		// Process food reminders
+		return pushActionsFiles.processFoodReminders(currentMappedMenuItems);
+	}).then(function()
+	{
+		response.success();
+	},
+	// Error handler
+	function(error)
+	{
+		resonse.error(error);
+	});
+
 });

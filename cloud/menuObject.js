@@ -55,6 +55,31 @@ exports.MenuObject.prototype.getAllMenuItems = function()
 	return allItems;
 };
 
+// Returns a map of all items
+// Map structure follows as ItemName -> [Locations]
+exports.MenuObject.prototype.getAllMenuItemsMapped = function()
+{
+	// Get all the items first
+	var allItems = this.getAllMenuItems();
+
+	var mappedItems = {};
+	
+	// Loop through each item and map them
+	for (var i = 0; i < allItems.length; ++i)
+	{
+		var item = allItems[i];
+		if (item.name in mappedItems && (mappedItems[item.name].indexOf(item.location) == -1))
+		{
+			mappedItems[item.name].push(item.location);
+		}
+		else
+		{
+			mappedItems[item.name] = [item.location];
+		}
+	}
+	return mappedItems;
+}
+
 function extendMenuItems(result, location)
 {
 	result.push.apply(result, location.breakfast);
@@ -69,17 +94,17 @@ function createMenuForLocation(location, breakfastElements, lunchElements, dinne
 	result.location = location;
 
 	// ----- Breakfast ----- //
-	result.breakfast = createMenuListForMeal("Breakfast", breakfastElements);
+	result.breakfast = createMenuListForMeal("Breakfast", breakfastElements, location);
 
 	// ----- Lunch ----- //
-	result.lunch = createMenuListForMeal("Lunch", lunchElements);
+	result.lunch = createMenuListForMeal("Lunch", lunchElements, location);
 	
 	// ----- Dinner ----- //
-	result.dinner = createMenuListForMeal("Dinner", dinnerElements);
+	result.dinner = createMenuListForMeal("Dinner", dinnerElements, location);
 	return result;
 }
 
-function createMenuListForMeal(meal, htmlElements)
+function createMenuListForMeal(meal, htmlElements, location)
 {
 	// Check if closed
 	if (htmlElements.em != null && htmlElements.em == "Closed")
@@ -103,7 +128,8 @@ function createMenuListForMeal(meal, htmlElements)
 			url: element.href,
 			name: element.font.content.trim(),
 			recNumber: getRecNumberForItem(element.href),
-			healthType: getHealthType(element)
+			healthType: getHealthType(element),
+			location: location
 		};
 
 		result.push(foodItem);
