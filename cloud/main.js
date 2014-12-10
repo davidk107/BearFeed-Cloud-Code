@@ -1,6 +1,7 @@
 var menuData = require('cloud/menuData.js')
 var locationData = require('cloud/locationsData.js');
 var menuObjectFile = require('cloud/menuObject.js');
+require('cloud/userData.js');
 
 
 // Main Function that will be called to update the menu twice a day
