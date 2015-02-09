@@ -1,3 +1,6 @@
+// This is the Menu class that is used to store and manipulate data representing today's menu
+
+// Dictionary to determine what type of category the food is (normal, vegetarian, or vegan)
 var HEALTH_TYPE_DICT = 
 {
 	"#000000" : "",
@@ -8,6 +11,13 @@ var HEALTH_TYPE_DICT =
 	"#800080" : "VEGAN"
 };
 
+//  =========================================== CLASS DEFINITION =========================================== //
+
+// Constructor
+// Paramters:
+// 		Array of html elements straight from YQL
+// Outputs:
+// 		Nothing
 exports.MenuObject = function(htmlElements)
 {
 	// Save htmlElements
@@ -17,6 +27,7 @@ exports.MenuObject = function(htmlElements)
 	this.parseData();
 }
 
+// Takes html data stored in htmlElements and converts it to JS usable data structures
 exports.MenuObject.prototype.parseData = function() 
 {
 	// Get the htmlElements
@@ -35,6 +46,7 @@ exports.MenuObject.prototype.parseData = function()
 	this.clarkKerr = createMenuForLocation("Clark Kerr", htmlElements.breakfast[3], htmlElements.lunch[3], htmlElements.dinner[3]);
 };
 
+// Returns an array of all the menu items being served today(duplicates will occur)
 exports.MenuObject.prototype.getAllMenuItems = function()
 {
 	// Results array
@@ -80,6 +92,9 @@ exports.MenuObject.prototype.getAllMenuItemsMapped = function()
 	return mappedItems;
 }
 
+//  =========================================== HELPER FUNCTIONS =========================================== //
+
+// Given a location, add its elements onto the result array
 function extendMenuItems(result, location)
 {
 	result.push.apply(result, location.breakfast);
@@ -87,6 +102,8 @@ function extendMenuItems(result, location)
 	result.push.apply(result, location.dinner);
 }
 
+// Given html elements corresponding to breakfast, lunch, or dinner
+// Parse the html and translate those into their respective arrays of FoodItems
 function createMenuForLocation(location, breakfastElements, lunchElements, dinnerElements)
 {
 	var result = {}
@@ -104,6 +121,7 @@ function createMenuForLocation(location, breakfastElements, lunchElements, dinne
 	return result;
 }
 
+// Given an array of html elements, parse it and return an array of FoodItems representing the the inputed menu
 function createMenuListForMeal(meal, htmlElements, location)
 {
 	// Check if closed
@@ -123,6 +141,7 @@ function createMenuListForMeal(meal, htmlElements, location)
 		// Get the a element
 		var element = htmlItemsArray[i];
 
+		// CREATING A NEW FOOD ITEM
 		var foodItem = 
 		{
 			url: element.href,

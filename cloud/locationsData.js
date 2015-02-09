@@ -1,5 +1,7 @@
 var DiningLocation = Parse.Object.extend("DiningLocation");
 
+//  =========================================== PUBLIC FUNCTIONS =========================================== //
+
 // Updates diningLocations data for each of the respective locations
 exports.updateLocationsData = function(menuObject)
 {
@@ -29,6 +31,8 @@ exports.updateLocationsData = function(menuObject)
 
 	return promise;
 }
+
+//  =========================================== HELPER FUNCTIONS =========================================== //
 
 // Updates the location that corresponds to locationData
 function updateLocation(locationData)

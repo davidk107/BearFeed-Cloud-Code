@@ -4,9 +4,62 @@ var privateData = require('cloud/privateData.js');
 // Parse Item Class
 var Item = Parse.Object.extend("Item");
 
+//  =========================================== MENU DATA PUBLIC FUNCTIONS =========================================== //
+
 // Fetches data from CalDining's Menu Website via YQL 
 // Query selects for the 3 <tr> elements that make up the actual menu portion of the page source
-exports.updateMenuData = function(currentMenuItems)
+// Then parses the data into an JS object
+// JS Object has attributes breakfast, lunch, and dinner 
+// that are linked to arrays of <td> html elements
+// Parameters:
+// 		Nothing
+// Outputs:
+// 		JS Object with attributes breakfast, lunch, and dinner
+exports.fetchMenuDetails = function()
+{
+	// Create Parse Promise
+	var promise = new Parse.Promise();
+
+	// YQL URL
+	var yqlURL = privateData.yqlURL;
+	
+	// Fetch data from the query
+	Parse.Cloud.httpRequest(
+	{
+		url: yqlURL,
+
+	}).then(function(response)
+	{
+		var websiteElements = JSON.parse(response.text);
+
+		// Get array of <tr> elements
+		var trArray = websiteElements.query.results.results.tr;
+
+		// Isolate the breakfast, lunch and dinner trs and store into result object
+		var result = {};
+		result.breakfast = trArray[0].td;
+		result.lunch = trArray[1].td;
+		result.dinner = trArray[2].td;
+
+		// Return results
+		promise.resolve(result);
+	},
+	// Error Handler
+	function(error)
+	{
+		console.log(error);
+		promise.reject("ERROR w/ fetchMenuDetails: " + error.status);
+	});
+
+	return promise;
+}
+
+// Given a list of current menu items, find any new items that are not in the database, and save those items
+// Parameters:
+// 		[FoodItems] - an array of JS Dicts representing each item (look to Menu.js for FoodItem implementation)
+// Outputs:
+// 		Nothing
+exports.updateMenuDatabase = function(currentMenuItems)
 {	
 	var promise = new Parse.Promise();
 	var newItems = [];
@@ -37,6 +90,8 @@ exports.updateMenuData = function(currentMenuItems)
 
 	return promise;
 }
+
+//  =========================================== HELPER FUNCTIONS =========================================== //
 
 // Takes in the list of items from the current menu
 // Fetch all the existing catalog items
@@ -165,45 +220,3 @@ function saveNewParseItem(itemObject)
 	return promise;
 }
 
-// Does the actual HTTP Request on the YQL URL
-// Then parses the data into an JS object
-// JS Object has attributes breakfast, lunch, and dinner 
-// that are linked to arrays of <td> html elements
-exports.fetchMenuDetails = function()
-{
-	// Create Parse Promise
-	var promise = new Parse.Promise();
-
-	// YQL URL
-	var yqlURL = privateData.yqlURL;
-	
-	// Fetch data from the query
-	Parse.Cloud.httpRequest(
-	{
-		url: yqlURL,
-
-	}).then(function(response)
-	{
-		var websiteElements = JSON.parse(response.text);
-
-		// Get array of <tr> elements
-		var trArray = websiteElements.query.results.results.tr;
-
-		// Isolate the breakfast, lunch and dinner trs and store into result object
-		var result = {};
-		result.breakfast = trArray[0].td;
-		result.lunch = trArray[1].td;
-		result.dinner = trArray[2].td;
-
-		// Return results
-		promise.resolve(result);
-	},
-	// Error Handler
-	function(error)
-	{
-		console.log(error);
-		promise.reject("ERROR w/ fetchMenuDetails: " + error.status);
-	});
-
-	return promise;
-}

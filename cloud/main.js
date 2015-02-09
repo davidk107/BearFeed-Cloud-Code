@@ -1,6 +1,6 @@
 var menuData = require('cloud/menuData.js')
 var locationData = require('cloud/locationsData.js');
-var menuObjectFile = require('cloud/menuObject.js');
+var Menu = require('cloud/Menu.js');
 var pushActionsFiles = require('cloud/pushActions.js');
 require('cloud/userData.js');
 
@@ -12,17 +12,18 @@ Parse.Cloud.job("updateData", function(request, response)
 	var menuObject = null;
 	var currentMenuItems = null;
 	var successString;
+
 	// Fetch the newest queried data from the website
 	menuData.fetchMenuDetails().then(function(result)
 	{
 		// Convert result into MenuObject
-		menuObject = new menuObjectFile.MenuObject(result);
+		menuObject = new Menu.MenuObject(result);
 
 		// Get all the items
 		currentMenuItems = menuObject.getAllMenuItems();
 		
-		// Check for new items and adds them to the catalog if found
-		return menuData.updateMenuData(currentMenuItems);
+		// Check for new items and add them to the catalog if found
+		return menuData.updateMenuDatabase(currentMenuItems);
 
 	// Successfully updated the list of items
 	}).then(function(updateMenuResult)
@@ -54,7 +55,7 @@ Parse.Cloud.job("sendFoodNotifications", function(request, response)
 	menuData.fetchMenuDetails().then(function(result)
 	{
 		// Convert result into MenuObject
-		menuObject = new menuObjectFile.MenuObject(result);
+		menuObject = new Menu.MenuObject(result);
 
 		// Get the map of all items
 		currentMappedMenuItems = menuObject.getAllMenuItemsMapped();

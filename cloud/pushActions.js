@@ -1,7 +1,14 @@
 var UserClass = Parse.Object.extend("UserClass");
 
+
+//  =========================================== PUSH ACTIONS PUBLIC FUNCTIONS =========================================== //
+
 // Takes in a map of food items
 // Items are mapped to an array of location names
+// Parameters:
+// 		Array of items with a locations array mapped to it
+// Outputs:
+// 		Nothing
 exports.processFoodReminders = function(mappedMenuItems)
 {
 	var promise = new Parse.Promise();
@@ -27,6 +34,8 @@ exports.processFoodReminders = function(mappedMenuItems)
 	});
 	return promise;
 }
+
+//  =========================================== HELPER FUNCTIONS =========================================== //
 
 // Sends a push out to any users who are subscribed to this item
 function sendPushForItem(item, locations)
