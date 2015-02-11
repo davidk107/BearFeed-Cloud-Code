@@ -1,4 +1,4 @@
-var menuObjectFile = require('cloud/menuObject.js');
+// var menuObjectFile = require('cloud/Menu.js');
 var privateData = require('cloud/privateData.js');
 
 // Parse Item Class
@@ -22,33 +22,36 @@ exports.fetchMenuDetails = function()
 
 	// YQL URL
 	var yqlURL = privateData.yqlURL;
-	
-	// Fetch data from the query
-	Parse.Cloud.httpRequest(
+
+	// We will attempt to perform 5 request attempts
+	var requests = [];
+	var numRequestAttempts = 5;
+	for (var i = 0; i < numRequestAttempts; ++i)
 	{
-		url: yqlURL,
+		requests.push(performYQLRequest(yqlURL));
+	}
 
-	}).then(function(response)
+	Parse.Promise.when(requests).then(function()
 	{
-		var websiteElements = JSON.parse(response.text);
-
-		// Get array of <tr> elements
-		var trArray = websiteElements.query.results.results.tr;
-
-		// Isolate the breakfast, lunch and dinner trs and store into result object
-		var result = {};
-		result.breakfast = trArray[0].td;
-		result.lunch = trArray[1].td;
-		result.dinner = trArray[2].td;
-
-		// Return results
-		promise.resolve(result);
+		// Loop through the arguments and find one that returns a valid result(not null)
+		for (var i = 0; i < arguments.length; ++i)
+		{
+			var checkResult = arguments[i];
+			if (checkResult != null)
+			{
+				promise.resolve(checkResult);
+				return;
+			}
+		}
+		// Else no results found, throw error
+		promise.reject("All YQL requests were unsuccessful");
 	},
-	// Error Handler
+	// Error handler
 	function(error)
 	{
-		console.log(error);
-		promise.reject("ERROR w/ fetchMenuDetails: " + error.status);
+		console.warn("ERROR w/ fetchMenuDetails");
+		console.warn(error);
+		promise.reject("All YQL requests were unsuccessful");
 	});
 
 	return promise;
@@ -80,7 +83,7 @@ exports.updateMenuDatabase = function(currentMenuItems)
 
 	}).then(function()
 	{
-		promise.resolve("Menu Data Updated with " + newItems.length + " new items!");
+		promise.resolve("Menu database updated with " + newItems.length + " new items!");
 	},
 	function(error)
 	{
@@ -92,6 +95,53 @@ exports.updateMenuDatabase = function(currentMenuItems)
 }
 
 //  =========================================== HELPER FUNCTIONS =========================================== //
+
+// This function will perform the actual httpRequest to retreive YQL results and performs null checks. 
+// If query result is invalid in anyways, then it will return null
+function performYQLRequest(yqlURL)
+{
+	var promise = new Parse.Promise();
+
+	// Fetch data from the query
+	Parse.Cloud.httpRequest(
+	{
+		url: yqlURL,
+
+	}).then(function(response)
+	{
+		var websiteElements = JSON.parse(response.text);
+
+		// Get array of <tr> elements
+		try 
+		{
+			var trArray = websiteElements.query.results.results.tr;			
+		}
+		catch(error)
+		{
+			console.warn("ERROR w/ fetching trArray");
+			console.warn(error);
+			return Parse.Promise.error("Invalid YQL result returned");
+		}
+
+		// Isolate the breakfast, lunch and dinner trs and store into result object
+		var result = {};
+		result.breakfast = trArray[0].td;
+		result.lunch = trArray[1].td;
+		result.dinner = trArray[2].td;
+
+		// Return results
+		promise.resolve(result);
+	},
+	// Error Handler
+	function(error)
+	{
+		console.warn("ERROR w/ performYQLRequest: ");
+		console.warn(error);
+		promise.resolve(null);
+	});
+
+	return promise;
+}
 
 // Takes in the list of items from the current menu
 // Fetch all the existing catalog items
@@ -151,6 +201,7 @@ function compareItems(itemA, itemB)
 // Takes in currentItems and existing Items
 // Returns an array of new items from currentItems that
 // are not in exisiting Items
+// currentItems and existingItems are two sorted array
 function findNewItems(currentItems, existingItems)
 {
 	// Base cases, if no more potential new items

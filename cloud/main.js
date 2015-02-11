@@ -40,7 +40,8 @@ Parse.Cloud.job("updateData", function(request, response)
 	// Error Handler
 	function(error)
 	{
-		response.error("ERROR: " + error.message);
+		console.warn(error);
+		response.error("ERROR w/ updateData");
 	});
 });
 
@@ -64,12 +65,13 @@ Parse.Cloud.job("sendFoodNotifications", function(request, response)
 		return pushActionsFiles.processFoodReminders(currentMappedMenuItems);
 	}).then(function()
 	{
-		response.success();
+		response.success("Food notifications successfully sent");
 	},
 	// Error handler
 	function(error)
 	{
-		resonse.error(error);
+		console.warn(error);
+		response.error("ERROR w/ sendFoodNotifications");
 	});
 
 });
