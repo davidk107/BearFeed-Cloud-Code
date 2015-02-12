@@ -39,12 +39,16 @@ exports.fetchMenuDetails = function()
 			var checkResult = arguments[i];
 			if (checkResult != null)
 			{
-				promise.resolve(checkResult);
-				return;
+				// promise.resolve(checkResult);
+				return Parse.Promise.as(checkResult);
 			}
 		}
 		// Else no results found, throw error
-		promise.reject("All YQL requests were unsuccessful");
+		return Parse.Promise.error("All YQL requests were unsuccessful");
+	
+	}).then(function(result)
+	{
+		promise.resolve(result);
 	},
 	// Error handler
 	function(error)
@@ -129,6 +133,9 @@ function performYQLRequest(yqlURL)
 		result.lunch = trArray[1].td;
 		result.dinner = trArray[2].td;
 
+		return Parse.Promise.as(result);
+	}).then(function(result)
+	{
 		// Return results
 		promise.resolve(result);
 	},
