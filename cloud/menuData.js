@@ -123,7 +123,6 @@ function performYQLRequest(yqlURL)
 		catch(error)
 		{
 			console.warn("ERROR w/ fetching trArray");
-			console.warn(error);
 			return Parse.Promise.error("Invalid YQL result returned");
 		}
 
