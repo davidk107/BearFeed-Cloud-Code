@@ -106,7 +106,7 @@ function extendMenuItems(result, location)
 // Parse the html and translate those into their respective arrays of FoodItems
 function createMenuForLocation(location, breakfastElements, lunchElements, dinnerElements)
 {
-	var result = {}
+	var result = {};
 	// Store location name
 	result.location = location;
 
@@ -125,14 +125,14 @@ function createMenuForLocation(location, breakfastElements, lunchElements, dinne
 function createMenuListForMeal(meal, htmlElements, location)
 {
 	// Check if closed
-	if (htmlElements.em != null && htmlElements.em == "Closed")
+	if (htmlElements.i == "Closed")
 	{
 		return [];
 	}
 
 	// Get the list of items
 	var htmlItemsArray = htmlElements.a;
-
+	
 	// Results array
 	var result = [];
 

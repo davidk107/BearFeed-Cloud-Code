@@ -1,4 +1,4 @@
-
 config
 public
-cloud/privateData.js
+privateData.js
+debug.js

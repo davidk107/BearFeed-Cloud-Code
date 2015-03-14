@@ -122,7 +122,7 @@ function performYQLRequest(yqlURL)
 		}
 		catch(error)
 		{
-			console.warn("ERROR w/ fetching trArray");
+			// console.warn("ERROR w/ fetching trArray");
 			return Parse.Promise.error("Invalid YQL result returned");
 		}
 
@@ -141,7 +141,7 @@ function performYQLRequest(yqlURL)
 	// Error Handler
 	function(error)
 	{
-		console.warn("ERROR w/ performYQLRequest: ");
+		// console.warn("ERROR w/ performYQLRequest: ");
 		console.warn(error);
 		promise.resolve(null);
 	});

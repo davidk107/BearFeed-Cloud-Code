@@ -4,7 +4,6 @@ var Menu = require('cloud/Menu.js');
 var pushActionsFiles = require('cloud/pushActions.js');
 require('cloud/userData.js');
 
-
 // Main Function that will be called to update the menu twice a day
 Parse.Cloud.job("updateData", function(request, response)
 {
