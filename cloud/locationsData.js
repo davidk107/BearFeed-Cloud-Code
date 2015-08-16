@@ -3,29 +3,26 @@ var DiningLocation = Parse.Object.extend("DiningLocation");
 //  =========================================== PUBLIC FUNCTIONS =========================================== //
 
 // Updates diningLocations data for each of the respective locations
-exports.updateLocationsData = function(menuObject)
-{
+exports.updateLocationsData = function(parsedData) {
 	var promise = new Parse.Promise();
 
 	// List of locations
-	var locations = ["crossroads", "cafe3", "clarkKerr", "foothill"];
+	var locationKeys = ["crossroads", "cafe3", "clarkKerr", "foothill"];
+	var locationNames = ["Crossroads", "Cafe 3", "Clark Kerr", "Foothill"];
 	var updateLocationPromises = [];
 
 	// Update each location
-	for (var i = 0 ; i < locations.length; ++i)
-	{
-		var location = locations[i];
-		updateLocationPromises.push(updateLocation(menuObject[location]));
+	for (var i = 0 ; i < locationKeys.length; ++i) {
+		var locationKey = locationKeys[i];
+		var locationName = locationNames[i];
+		updateLocationPromises.push(updateLocation(parsedData[locationKey], locationName));
 	}
 
 	// Resolve when updates are done
-	Parse.Promise.when(updateLocationPromises).then(function()
-	{
+	Parse.Promise.when(updateLocationPromises).then(function() {
 		promise.resolve();
-	},
-	// Error handler
-	function(error)
-	{
+		
+	}, function(error) {
 		promise.reject();
 	});
 
@@ -35,84 +32,59 @@ exports.updateLocationsData = function(menuObject)
 //  =========================================== HELPER FUNCTIONS =========================================== //
 
 // Updates the location that corresponds to locationData
-function updateLocation(locationData)
-{
+function updateLocation(locationMenuData, locationName) {
 	// Create promise
 	var promise = new Parse.Promise();
 
-	// Get menu data 
-	var menuData = convertLocationDataToMenuData(locationData);
-
 	// Get the parse location object
 	var locationQuery = new Parse.Query(DiningLocation);
-	locationQuery.equalTo("locationName", locationData.location);
-	locationQuery.first().then(function(locationObject)
-	{
+	locationQuery.equalTo("locationName", locationName);
+	locationQuery.first().then(function(locationObject) {
+		
 		// If location object does not exist, then create new one
-		if (locationObject == null)
-		{
+		if (locationObject == null) {
 			locationObject = new DiningLocation();
-			locationObject.set("locationName", locationData.location);
+			locationObject.set("locationName", locationName);
 		}
 
 		// Update menuObject
-		locationObject.set("menuData", menuData);
+		locationObject.set("menuData", stripLocationMenuData(locationMenuData));
 
 		// Save
 		return locationObject.save();
 
-	}).then(function()
-	{
-		// console.log(locationData.location + " has been updated!");
+	}).then(function() {
 		promise.resolve();
-	},
-	// Error handler
-	function(error)
-	{
-		console.log("ERROR w/ updateLocation: " + error.message);
-		promise.reject("ERROR w/ updateLocation");
+
+	}, function(error) {
+		console.warn("ERROR w/ updateLocation: " + error.message);
+		promise.reject();
 	});
 
 	return promise;
 }
 
-// Converts a JS object for a location into just a JS object with menu details
-function convertLocationDataToMenuData(locationData)
-{	
-	// Breakfast
-	var breakfastArray = getArrayOfMenuItems(locationData, "breakfast");
+// Strips down the parsed location menu data into just name and healthType
+function stripLocationMenuData(locationMenuData) {
+	var result = {};
 
-	// Lunch
-	var lunchArray = getArrayOfMenuItems(locationData, "lunch");
+	// Convert
+	result.breakfast = stripItemArray(locationMenuData.breakfast);
+	result.lunch = stripItemArray(locationMenuData.lunch);
+	result.dinner = stripItemArray(locationMenuData.dinner);
 
-	// Dinner
-	var dinnerArray = getArrayOfMenuItems(locationData, "dinner");	
-
-	return {
-		"breakfast" : breakfastArray,
-		"lunch" : lunchArray,
-		"dinner" : dinnerArray
-	}
-	
+	return result;
 }
 
-// Create array of items for given menu type(breakfast, lunch, dinner)
-function getArrayOfMenuItems(locationData, menuType)
-{
-	var result = []
-	var sourceArray = locationData[menuType];
-	for (var i = 0; i < sourceArray.length; ++i)
-	{
-		// Get the item
-		var item = sourceArray[i];
-
-		// Create JS object from it with just item name and health type
-		var itemObject = {
-			name : item.name,
-			healthType : item.healthType
-		}
-
-		result.push(itemObject);
+function stripItemArray(fullItemArray) {
+	var strippedItems = [];
+	for (var i = 0; i < fullItemArray.length; ++i) {
+		var fullItem = fullItemArray[i];
+		var strippedItem = {
+			name: fullItem.name,
+			healthType: fullItem.healthType
+		};
+		strippedItems.push(strippedItem);
 	}
-	return result;
+	return strippedItems;
 }
