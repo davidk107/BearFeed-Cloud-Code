@@ -7,7 +7,7 @@ var SERVICES = require('cloud/services.js');
 // Ideally only high level logic is done in this function
 // i.e Config checking, error handling, returning results
 // Logic flow is
-//      Check configs --> Perform Query --> Process results --> Update DB --> Report success/failured
+//      Check configs --> Call Service --> Report success/failured
 Parse.Cloud.job("updateData", function(request, response) {
 
     // Check configs to see if currently summer session or not

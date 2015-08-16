@@ -13,7 +13,7 @@ var HEALTH_TYPE_DICT = {
 // Format is of type
 //  {crossroads:{breakfast:[...], lunch:[...], dinner:[...]}, allItems:{items:{rec -> item}, recNumbers:[...]}}
 exports.parseRawDataSummer = function(rawMenuData) {
-    // Since only Crossroads in the summer, we can prepopulate result with empty results for the other locations
+    // Since only Crossroads is open in the summer, we can prepopulate result with empty results for the other locations
     // This makes for easy processing futher down 
     var result = {
         cafe3: {breakfast:[], lunch:[], dinner:[]},
