@@ -63,13 +63,13 @@ function convertHTMLAnchorArray(anchorElements, location, allItems) {
 
         // Add to allItems and keep track of where this item is being served for use in push notifications later on
         var recNumber = item.recNumber;
-        if (recNumber in allItems) {
+        if (recNumber in allItems.items) {
             // Already added
-            allItems.items.recNumber.locations.push(location);
+            allItems.items[recNumber].locations.push(location);
         } else {
             // New Item
             item.locations = [location];
-            allItems.items.recNumber = item;
+            allItems.items[recNumber] = item;
             allItems.recNumbers.push(recNumber);
         }
     }

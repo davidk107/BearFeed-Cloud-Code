@@ -27,6 +27,7 @@ Parse.Cloud.job("updateData", function(request, response) {
 });
 
 // Function call to send out push notifications for subscribed items
+// TODO: FINISH THIS FUNCTION
 Parse.Cloud.job("sendFoodNotifications", function(request, response) {
     // Local Variables
     var menuObject = null;

@@ -21,7 +21,7 @@ exports.updateLocationsData = function(parsedData) {
 	// Resolve when updates are done
 	Parse.Promise.when(updateLocationPromises).then(function() {
 		promise.resolve();
-		
+
 	}, function(error) {
 		promise.reject();
 	});
@@ -82,7 +82,8 @@ function stripItemArray(fullItemArray) {
 		var fullItem = fullItemArray[i];
 		var strippedItem = {
 			name: fullItem.name,
-			healthType: fullItem.healthType
+			healthType: fullItem.healthType,
+			recNumber: fullItem.recNumber
 		};
 		strippedItems.push(strippedItem);
 	}

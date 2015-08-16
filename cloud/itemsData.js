@@ -1,13 +1,11 @@
 // Parse Item Class
 var Item = Parse.Object.extend("Item");
 
-
 // Given a list of current menu items, find any new items that are not in the database, and save those items
 // Parameters:
 // 		allItems: {items:{rec -> item}, recNumbers:[...]}
 // Outputs:
 // 		Nothing
-// TODO: FINISH THIS FUNCTION
 exports.updateItemsDatabase = function(allItems) {	
 	var promise = new Parse.Promise();
 
@@ -19,120 +17,94 @@ exports.updateItemsDatabase = function(allItems) {
 	var itemsQuery = new Parse.Query(Item);
 	itemsQuery.containedIn("recNumber", recNumbers);
 	itemsQuery.ascending("recNumber");
-	itemsQuery.find().then(function(items) {
-		promise.resolve(0);
-	});
+	itemsQuery.select("recNumber");
+	itemsQuery.find().then(function(existingItems) {
+
+		// Find any new items and save them
+		var newItemRecNumbers = findNewItems(recNumbers, existingItems);
+		return saveNewItems(allItems, newItemRecNumbers);
+
+	}).then(function(result) {
+		promise.resolve(result);
+	
+	}, function(error) {
+		console.warn("ERROR w/ updateItemsDatabase: " + error.message);
+		promise.reject();
+	}); 
 
 	return promise;
 }
 
 //  =========================================== HELPER FUNCTIONS =========================================== //
-
-
-// Takes in the list of items from the current menu
-// Fetch all the existing catalog items
-// Compares and find if there are any new items that need to be saved
-function checkForNewItems(currentMenuItems) {
-	// Create promise
+// Takes in our parsed data of allItems and an array of new recNumbers.
+// Maps the recNumbers to their data and creates a new Item class to be saved to the DB
+function saveNewItems(allItems, newItemRecNumbers) {
 	var promise = new Parse.Promise();
+	var newItemPromises = [];
 
-	// Get the items already added to the catalog
-	var itemsQuery = new Parse.Query(Item);
-	itemsQuery.ascending("name");
-	itemsQuery.limit(1000);
+	for (var i = 0; i < newItemRecNumbers.length; ++i) {
+		// Retreive our new item data
+		var recNumber = newItemRecNumbers[i];
+		var itemData = allItems.items[recNumber];
 
-	// Limit query to a list of only the names of current menu items 
-	var listOfCurrentItemNames = currentMenuItems.map(function (item) { return item.name});
-	itemsQuery.containedIn("name",listOfCurrentItemNames);
+		// Null check
+		if (!itemData) {
+			continue;
+		}
 
-	// Execute the query
-	itemsQuery.find().then(function(existingItems)
-	{
-		// Sort the list of current items for use in comparison function
-		currentMenuItems.sort(compareItems);
-
-		// Return any new Items
-		promise.resolve(findNewItems(currentMenuItems, existingItems));
-	},
-	// Error Handler
-	function (error)
-	{
-		console.log("ERROR w/ checkForNewItems: " + error.message);
-		promise.reject("ERROR w/ checkForNewItems");
-	});
-
-	return promise;
-}
-
-
-// Takes in currentItems and existing Items
-// Returns an array of new items from currentItems that
-// are not in exisiting Items
-// currentItems and existingItems are two sorted array
-function findNewItems(currentItems, existingItems) {
-	// Base cases, if no more potential new items
-	if (currentItems.length == 0)
-	{
-		return [];
+		// Create a new item and save it
+		var newItem = new Item();
+		newItem.set("recNumber", recNumber);
+		newItem.set("name", itemData.name);
+		newItem.set("healthType", itemData.healthType);
+		newItemPromises.push(newItem.save());
 	}
-	// Skip duplicates
-	else if (currentItems.length >= 2 && currentItems[0].name == currentItems[1].name)
-	{
-		currentItems.splice(0,1);
-		return findNewItems(currentItems, existingItems);
-	}
-	// Existing items have all been looked through, rest of currentItems are all new items
-	else if (existingItems.length == 0)
-	{
-		var result = [currentItems.splice(0,1)[0]];
-		result.push.apply(result, findNewItems(currentItems, existingItems));
-		return result;
-	}
-	// If found, eliminate element from both lists
-	else if (currentItems[0].name == existingItems[0].get("name"))
-	{
-		currentItems.splice(0,1);
-		existingItems.splice(0,1);
-		return findNewItems(currentItems, existingItems);
-	}
-	// If currentItem < existingItem, then it is new item,
-	// Add to result and continue processing the list
-	else if (currentItems[0].name < existingItems[0].get("name"))
-	{
-		var result = [currentItems.splice(0,1)[0]];
-		result.push.apply(result, findNewItems(currentItems, existingItems));
-		return result;
-	}
-	// Else currentItem > existingItem, then continue going down existingItems
-	else
-	{
-		existingItems.splice(0,1);
-		return findNewItems(currentItems, existingItems);
-	}
-}
 
-// Takes in a JS representation of an item
-// and converts it to a Parse Object and saves it
-function saveNewParseItem(itemObject) {
-	var promise = new Parse.Promise();
-
-	// Create the new item
-	var newItem = new Item();
-	newItem.set("name", itemObject.name);
-	newItem.set("url", itemObject.url);
-	newItem.set("recNumber", itemObject.recNumber);
-	newItem.set("healthType", itemObject.healthType);
-
-	// Save the new item
-	newItem.save().then(function()
-	{
-		promise.resolve();
-	},
-	function(error)
-	{
+	Parse.Promise.when(newItemPromises).then(function() {
+		promise.resolve(newItemPromises.length + "");
+	
+	}, function(error) {
+		console.warn("ERROR w/ saveNewItems: " + error.message);
 		promise.reject();
 	});
 
 	return promise;
 }
+// Takes in currentItems and existing Items
+// Returns an array of new items from currentItems that
+// are not in exisiting Items
+// currentItems and existingItems are two sorted array
+// currentItems is just an array of recNumbers
+// existingItems contains Parse Objects with an attribute recNumber
+function findNewItems(currentItems, existingItems) {
+	// Base cases, if no more potential new items
+	if (currentItems.length == 0) {
+		return [];
+	}
+	
+	// Existing items have all been looked through, rest of currentItems are all new items
+	else if (existingItems.length == 0) {
+		return currentItems;
+	}
 
+	// If found, eliminate element from both lists
+	else if (currentItems[0] == existingItems[0].get("recNumber")) {
+		currentItems.splice(0,1);
+		existingItems.splice(0,1);
+		return findNewItems(currentItems, existingItems);
+	}
+
+	// If currentItem < existingItem, then it is new item,
+	// Add to result and continue processing the list
+	else if (currentItems[0] < existingItems[0].get("recNumber")) {
+		var result = [currentItems.splice(0,1)[0]];
+		result.push.apply(result, findNewItems(currentItems, existingItems));
+		return result;
+	}
+
+	// Else currentItem > existingItem, then continue going down existingItems
+	else {
+		existingItems.splice(0,1);
+		return findNewItems(currentItems, existingItems);
+	}
+}
