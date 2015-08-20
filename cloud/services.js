@@ -34,7 +34,7 @@ exports.updateData = function(isSummer) {
 
     }).then(function() {
 
-        promise.resolve(numNewItems + (numNewItems == 1 ? "new item!" : " new items!"));
+        promise.resolve(numNewItems + (numNewItems == 1 ? " new item!" : " new items!"));
 
     }, function(error) {
         console.warn("ERROR w/ updateDataSummer: " + error.message);

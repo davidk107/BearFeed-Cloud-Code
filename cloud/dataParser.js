@@ -37,9 +37,43 @@ exports.parseRawDataSummer = function(rawMenuData) {
 
 
 // ---------- SCHOOL YEAR LOGIC ---------- //
-// TODO: FINISH THIS FUNCTION
-exports.parseRawDataRegular = function() {
+exports.parseRawDataRegular = function(rawMenuData) {
+    var result = {};
 
+    // All items
+    var allItems = {items:{}, recNumbers:[]};
+
+     // Crossroads
+    var crossroads = {};
+    crossroads.breakfast = convertHTMLAnchorArray(rawMenuData.breakfast[0].a, "Crossroads", allItems);
+    crossroads.lunch = convertHTMLAnchorArray(rawMenuData.lunch[0].a, "Crossroads", allItems);
+    crossroads.dinner = convertHTMLAnchorArray(rawMenuData.dinner[0].a, "Crossroads", allItems);
+
+    // Cafe 3
+    var cafe3 = {};
+    cafe3.breakfast = convertHTMLAnchorArray(rawMenuData.breakfast[1].a, "Cafe 3", allItems);
+    cafe3.lunch = convertHTMLAnchorArray(rawMenuData.lunch[1].a, "Cafe 3", allItems);
+    cafe3.dinner = convertHTMLAnchorArray(rawMenuData.dinner[1].a, "Cafe 3", allItems);
+
+    // Foothill
+    var foothill = {};
+    foothill.breakfast = convertHTMLAnchorArray(rawMenuData.breakfast[2].a, "Foothill", allItems);
+    foothill.lunch = convertHTMLAnchorArray(rawMenuData.lunch[2].a, "Foothill", allItems);
+    foothill.dinner = convertHTMLAnchorArray(rawMenuData.dinner[2].a, "Foothill", allItems);
+
+    // Clark Kerr
+    var clarkKerr = {};
+    clarkKerr.breakfast = convertHTMLAnchorArray(rawMenuData.breakfast[3].a, "Clark Kerr", allItems);
+    clarkKerr.lunch = convertHTMLAnchorArray(rawMenuData.lunch[3].a, "Clark Kerr", allItems);
+    clarkKerr.dinner = convertHTMLAnchorArray(rawMenuData.dinner[3].a, "Clark Kerr", allItems);
+
+    // Saving all to results and returning it
+    result.crossroads = crossroads;
+    result.cafe3 = cafe3;
+    result.foothill = foothill;
+    result.clarkKerr = clarkKerr;
+    result.allItems = allItems;
+    return result;
 }
 
 // ----------========== HELPER FUNCTIONS ==========---------- //
