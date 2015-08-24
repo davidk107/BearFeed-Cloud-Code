@@ -29,7 +29,7 @@ exports.updateItemsDatabase = function(allItems) {
 		promise.resolve(result);
 	
 	}, function(error) {
-		console.warn("ERROR w/ updateItemsDatabase: " + error.message);
+		console.warn("ERROR w/ updateItemsDatabase: " + error ? error.message : "");
 		promise.reject();
 	}); 
 
@@ -52,7 +52,7 @@ function saveNewItems(allItems, newItemRecNumbers) {
 		if (!itemData) {
 			continue;
 		}
-
+	
 		// Create a new item and save it
 		var newItem = new Item();
 		newItem.set("recNumber", recNumber);
@@ -65,8 +65,8 @@ function saveNewItems(allItems, newItemRecNumbers) {
 		promise.resolve(newItemPromises.length + "");
 	
 	}, function(error) {
-		console.warn("ERROR w/ saveNewItems: " + error.message);
-		promise.reject();
+		console.log("ERROR w/ saveNewItems");
+		promise.reject("ERROR w/ saveNewItems");
 	});
 
 	return promise;
@@ -98,7 +98,7 @@ function findNewItems(currentItems, existingItems) {
 	// If currentItem < existingItem, then it is new item,
 	// Add to result and continue processing the list
 	else if (currentItems[0] < existingItems[0].get("recNumber")) {
-		var result = [currentItems.splice(0,1)];
+		var result = currentItems.splice(0,1);
 		result.push.apply(result, findNewItems(currentItems, existingItems));
 		return result;
 	}
