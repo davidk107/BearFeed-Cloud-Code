@@ -5,6 +5,12 @@ var Item = Parse.Object.extend("Item");
 Parse.Cloud.define("purgeDuplicateEntries", function(request, response) {
     var itemsToRemove = [];
 
+    // Function must be called as master
+    if (!request.master) {
+        console.warn("ERROR w/ purgeDuplicateEntries: FUNCTION MUST BE CALLED FROM MASTER")
+        return response.error();
+    }
+
     Parse.Config.get().then(function(config) {
         var isDebugEnabled = config.get("isDebugEnabled");
         // Debug not enabled
