@@ -21,7 +21,7 @@ Parse.Cloud.job("updateData", function(request, response) {
         response.success(resultMessage);
 
     }, function(error) {
-        console.warn("ERROR w/ updateData: " + error.message ? error.message : "");
+        console.warn("ERROR w/ updateData: " + error && error.message ? error.message : "");
         response.error();
     });
 });
