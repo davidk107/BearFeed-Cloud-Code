@@ -78,8 +78,8 @@ function saveNewItems(allItems, newItemRecNumbers) {
 // currentItems is just an array of recNumbers
 // existingItems contains Parse Objects with an attribute recNumber
 function findNewItems(currentItems, existingItems) {
-	// Base cases, if no more potential new items
-	if (currentItems.length == 0) {
+	// Base cases, if no more potential new items or if equal lengths, then no new items 
+	if (currentItems.length == 0 || currentItems.length == existingItems.length) {
 		return [];
 	}
 	
