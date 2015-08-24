@@ -15,6 +15,7 @@ exports.updateItemsDatabase = function(allItems) {
 
 	// Query for items that are contained in recNumbers based on the recNumber field
 	var itemsQuery = new Parse.Query(Item);
+	itemsQuery.limit(1000);
 	itemsQuery.containedIn("recNumber", recNumbers);
 	itemsQuery.ascending("recNumber");
 	itemsQuery.select("recNumber");
@@ -97,7 +98,7 @@ function findNewItems(currentItems, existingItems) {
 	// If currentItem < existingItem, then it is new item,
 	// Add to result and continue processing the list
 	else if (currentItems[0] < existingItems[0].get("recNumber")) {
-		var result = [currentItems.splice(0,1)[0]];
+		var result = [currentItems.splice(0,1)];
 		result.push.apply(result, findNewItems(currentItems, existingItems));
 		return result;
 	}
